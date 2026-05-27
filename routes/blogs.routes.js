@@ -1,7 +1,7 @@
 import express from 'express'
 import Blog from '../models/blogs.models.js'
 import {allBlogs, blogDetail, createBlog,updateBlog, deleteBlog} from '../controllers/blogs.controllers.js'
-import { upload } from '../middleware/imageMulter.js'
+import {upload} from "../middleware/imageMulter.js";
 
 const router = express.Router()
 

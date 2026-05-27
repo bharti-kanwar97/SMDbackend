@@ -1,5 +1,6 @@
 import Blog from '../models/blogs.models.js'
 import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utils/upload.js";
 import fs from "fs";
 // TO SHOW ALL BLOGS
 export const allBlogs = async (req, res) => {
@@ -53,24 +54,26 @@ export const blogDetail = async (req, res) => {
 
 export const createBlog = async (req, res) => {
   try {
-    // 1. Upload file from local path to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "blogs",
-    });
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
-    // 2. Save in MongoDB
+    if (!req.file) {
+      return res.status(400).json({ message: "Image not found" });
+    }
+
+    // upload image to cloudinary
+    const result = await uploadToCloudinary(req.file.buffer);
+
     const blog = await Blog.create({
       title: req.body.title,
       content: req.body.content,
-      image: result.secure_url,
+      image: result.secure_url, // 🔥 important
     });
-
-    // 3. Delete local file after upload (VERY IMPORTANT)
-    fs.unlinkSync(req.file.path);
 
     res.status(201).json(blog);
   } catch (error) {
-    res.status(500).json(error.message);
+    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -81,9 +84,13 @@ export const createBlog = async (req, res) => {
 export const updateBlog = async (req, res) => {
     try{
        const updatedData = {...req.body};
-       if (req.file) {
-      updatedData.image =
-        req.file.filename;
+       // If new image is uploaded
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "blogs",
+      });
+
+      updatedData.image = result.secure_url;
     }
     const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, updatedData, {new: true})
     if(!updatedBlog) return res.status(404).json({message: "Page not found"})
