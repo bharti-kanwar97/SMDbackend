@@ -34,24 +34,6 @@ export const blogDetail = async (req, res) => {
 }
 
 // TO CREATE A BLOG
-// export const createBlog = async (req, res) => {
-//     try{
-//         console.log(req.body)
-//         console.log(req.file) 
-        
-//         const {title, content} = req.body
-
-   
-//         const blog = await Blog.create({title, content,image: req.file.filename})
-//         res.json(blog)
-//     }
-//     catch(error){
-//         res.status(500).json({message: error.message})
-//     }
-
-// }
-
-
 export const createBlog = async (req, res) => {
   try {
     console.log("BODY:", req.body);
@@ -82,27 +64,40 @@ export const createBlog = async (req, res) => {
 
 // TO UPDATE A BLOG
 export const updateBlog = async (req, res) => {
-    try{
-       const updatedData = {...req.body};
-       // If new image is uploaded
+  try {
+    const updatedData = { ...req.body };
+
+    // if new image uploaded
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "blogs",
-      });
+
+      // upload image to cloudinary
+      const result = await uploadToCloudinary(req.file.buffer);
 
       updatedData.image = result.secure_url;
     }
-    const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, updatedData, {new: true})
-    if(!updatedBlog) return res.status(404).json({message: "Page not found"})
-        res.json(updatedBlog)
 
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-        console.log(error)
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({
+        message: "Blog not found",
+      });
     }
 
-}
+    res.status(200).json(updatedBlog);
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 // TO DELETE A BLOG
 export const deleteBlog = async (req, res) => {
