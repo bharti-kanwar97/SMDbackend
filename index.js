@@ -21,7 +21,7 @@ const __dirname = path.dirname(__filename);
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 app.use(cors({
-    origin: 'https://frontend-academy-seven.vercel.app',
+    origin: 'https://frontend-academy-rho.vercel.app',
     credentials: true
 }));
 
