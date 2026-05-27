@@ -56,20 +56,12 @@ export const createBlog = async (req, res) => {
     const blog = await Blog.create({
       title: req.body.title,
       content: req.body.content,
-
-      // Cloudinary image URL
-      image: req.file.path,
+      image: req.file.path, // 👈 Cloudinary URL
     });
 
-    res.status(201).json({
-      success: true,
-      blog,
-    });
+    res.status(201).json(blog);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 

@@ -11,7 +11,6 @@ router.get('/', allBlogs);
 // create blog
 router.post('/addblog',upload.single("image"), createBlog);
 
-
 // UPDATE A BLOG
 router.put('/updateblog/:id',upload.single("image"),updateBlog)
 
