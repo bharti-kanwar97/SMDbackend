@@ -1,4 +1,6 @@
 import Blog from '../models/blogs.models.js'
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 // TO SHOW ALL BLOGS
 export const allBlogs = async (req, res) => {
     try{
@@ -31,20 +33,51 @@ export const blogDetail = async (req, res) => {
 }
 
 // TO CREATE A BLOG
-export const createBlog = async (req, res) => {
-    try{
-        console.log(req.body)
-        console.log(req.file) 
+// export const createBlog = async (req, res) => {
+//     try{
+//         console.log(req.body)
+//         console.log(req.file) 
         
-        const {title, content} = req.body
-        const blog = await Blog.create({title, content,image: req.file.filename})
-        res.json(blog)
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-    }
+//         const {title, content} = req.body
 
-}
+   
+//         const blog = await Blog.create({title, content,image: req.file.filename})
+//         res.json(blog)
+//     }
+//     catch(error){
+//         res.status(500).json({message: error.message})
+//     }
+
+// }
+
+export const createBlog = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+
+    // upload image to cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "blogs",
+    });
+
+    // save blog
+    const blog = await Blog.create({
+      title,
+      content,
+      image: result.secure_url,
+    });
+
+    // remove local file
+    fs.unlinkSync(req.file.path);
+
+    res.status(201).json(blog);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
 
 // TO UPDATE A BLOG
 export const updateBlog = async (req, res) => {

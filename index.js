@@ -8,7 +8,10 @@ import subjectRoutes from './routes/subject.routes.js'
 import path from 'path'
 import cors from 'cors'
 import { fileURLToPath } from 'url'
+
 import validationRegistration from './middleware/validation.js'
+
+
 
 // CREATE AN OBJECT
 const app = express()
