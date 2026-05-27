@@ -52,25 +52,18 @@ export const blogDetail = async (req, res) => {
 
 export const createBlog = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    console.log(req.file);
 
-    // upload image to cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "blogs",
-    });
-
-    // save blog
     const blog = await Blog.create({
-      title,
-      content,
-      image: result.secure_url,
+      title: req.body.title,
+      content: req.body.content,
+      image: req.file.path,
     });
-
-    // remove local file
-    fs.unlinkSync(req.file.path);
 
     res.status(201).json(blog);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
