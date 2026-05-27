@@ -33,32 +33,82 @@ export const subjectDetail = async (req, res) => {
 }
 
 // TO CREATE SUBJECT
+
 export const createSubject = async (req, res) => {
-    try{
-       const {name, shortDesc,duration,projects,students,stPackage,endPackage, content1, content2} = req.body;
-      const subLogo = req.files?.subLogo?.[0]?.filename || "";
-      const image1 = req.files?.image1?.[0]?.filename || "";
-      const image2 = req.files?.image2?.[0]?.filename || "";
-      const subject = await Subject.create({
-        name,
-        subLogo,
-        shortDesc,
-        duration,
-        projects,
-        students,
-        stPackage,
-        endPackage,
-        image1,
-        content1,
-        image2,
-        content2
-      })
-      res.status(201).json(subject)
+  try {
+
+    const {
+      name,
+      shortDesc,
+      duration,
+      projects,
+      students,
+      stPackage,
+      endPackage,
+      content1,
+      content2,
+    } = req.body;
+
+    let subLogo = "";
+    let image1 = "";
+    let image2 = "";
+
+    // upload subLogo
+    if (req.files?.subLogo) {
+
+      const result = await uploadToCloudinary(
+        req.files.subLogo[0].buffer
+      );
+
+      subLogo = result.secure_url;
     }
-    catch(error){
-        res.status(500).send({message: error.message})
+
+    // upload image1
+    if (req.files?.image1) {
+
+      const result = await uploadToCloudinary(
+        req.files.image1[0].buffer
+      );
+
+      image1 = result.secure_url;
     }
-}
+
+    // upload image2
+    if (req.files?.image2) {
+
+      const result = await uploadToCloudinary(
+        req.files.image2[0].buffer
+      );
+
+      image2 = result.secure_url;
+    }
+
+    const subject = await Subject.create({
+      name,
+      subLogo,
+      shortDesc,
+      duration,
+      projects,
+      students,
+      stPackage,
+      endPackage,
+      image1,
+      content1,
+      image2,
+      content2,
+    });
+
+    res.status(201).json(subject);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 // TO UPDATE A SUBJECT
 export const updateSubject = async (req, res) => {
