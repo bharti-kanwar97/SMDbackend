@@ -1,4 +1,6 @@
 import Subject from "../models/subjects.models.js";
+import { uploadToCloudinary } from "../utils/upload.js";
+import cloudinary from "../config/cloudinary.js";
 
 // GET ALL SUBJECTS
 export const getAllSubjects = async (req, res) => {
@@ -60,40 +62,65 @@ export const createSubject = async (req, res) => {
 
 // TO UPDATE A SUBJECT
 export const updateSubject = async (req, res) => {
-    try{
-        const updatedData = {
+  try {
+
+    const updatedData = {
       ...req.body,
     };
 
     // subLogo
     if (req.files?.subLogo) {
-      updatedData.subLogo =
-        req.files.subLogo[0].filename;
+
+      const subLogoResult = await uploadToCloudinary(
+        req.files.subLogo[0].buffer
+      );
+
+      updatedData.subLogo = subLogoResult.secure_url;
     }
 
     // image1
     if (req.files?.image1) {
-      updatedData.image1 =
-        req.files.image1[0].filename;
+
+      const image1Result = await uploadToCloudinary(
+        req.files.image1[0].buffer
+      );
+
+      updatedData.image1 = image1Result.secure_url;
     }
 
     // image2
     if (req.files?.image2) {
-      updatedData.image2 =
-        req.files.image2[0].filename;
+
+      const image2Result = await uploadToCloudinary(
+        req.files.image2[0].buffer
+      );
+
+      updatedData.image2 = image2Result.secure_url;
     }
-     const updatedSubject = await Subject.findByIdAndUpdate(req.params.id, updatedData,{new: true})
-     if(!updatedSubject){
-        return res.status(404).json({message: 'Subject not found'})
-     }
-     res.json(updatedSubject)
-     console.log(updatedSubject)
+
+    const updatedSubject = await Subject.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true }
+    );
+
+    if (!updatedSubject) {
+      return res.status(404).json({
+        message: "Subject not found",
+      });
     }
-    catch(error){
-        console.log(error)
-        res.status(500).send({message: error.message})
-    }
-}
+
+    res.status(200).json(updatedSubject);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 // TO DELETE A SUBJECT
 export const deleteSubject  = async (req, res) => {
