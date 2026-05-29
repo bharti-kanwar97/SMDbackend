@@ -12,7 +12,7 @@ import {body, validationResult} from 'express-validator'
     .isLength({min: 10, max: 10}).withMessage("Enter a valid phone number"),
     body("about").notEmpty().withMessage("About is required"),
     body("msg").notEmpty().withMessage("Message is required")
-    .isLength({min: 20}).withMessage("Message must be at least 20 characters long"),
+    .isLength({min: 10}).withMessage("Message must be at least 10 characters long"),
     (req,res,next) => {
         const error = validationResult(req)
         if(!error.isEmpty())
